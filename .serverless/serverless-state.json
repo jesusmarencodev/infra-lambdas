@@ -1,0 +1,302 @@
+{
+  "service": {
+    "service": "infraestructure",
+    "serviceObject": {
+      "name": "infraestructure"
+    },
+    "provider": {
+      "name": "aws",
+      "runtime": "nodejs14.x",
+      "stage": "dev",
+      "environment": {
+        "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+        "NODE_OPTIONS": "--enable-source-maps --stack-trace-limit=1000"
+      },
+      "region": "us-east-1",
+      "versionFunctions": true,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "ServerlessDeploymentBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketEncryption": {
+                "ServerSideEncryptionConfiguration": [
+                  {
+                    "ServerSideEncryptionByDefault": {
+                      "SSEAlgorithm": "AES256"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "ServerlessDeploymentBucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+              "Bucket": {
+                "Ref": "ServerlessDeploymentBucket"
+              },
+              "PolicyDocument": {
+                "Statement": [
+                  {
+                    "Action": "s3:*",
+                    "Effect": "Deny",
+                    "Principal": "*",
+                    "Resource": [
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":s3:::",
+                            {
+                              "Ref": "ServerlessDeploymentBucket"
+                            },
+                            "/*"
+                          ]
+                        ]
+                      },
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":s3:::",
+                            {
+                              "Ref": "ServerlessDeploymentBucket"
+                            }
+                          ]
+                        ]
+                      }
+                    ],
+                    "Condition": {
+                      "Bool": {
+                        "aws:SecureTransport": false
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "S3BucketDeploymentLambdas": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketName": "digital-test-ttaa-jdmp-adev"
+            }
+          },
+          "SSMAPIGatewayRestApiId": {
+            "Type": "AWS::SSM::Parameter",
+            "Properties": {
+              "Name": "/digital/api-gateway-rest-api-id-dev",
+              "Type": "String",
+              "Value": "2191e9kay8"
+            }
+          },
+          "SSMAPIGatewayRestApiRootResourceId": {
+            "Type": "AWS::SSM::Parameter",
+            "Properties": {
+              "Name": "/digital/api-gateway-rest-api-root-resource-id-dev",
+              "Type": "String",
+              "Value": "6pmiw878ck"
+            }
+          },
+          "SSMS3BucketDeployment": {
+            "Type": "AWS::SSM::Parameter",
+            "Properties": {
+              "Name": "/digital/s3-bucket-deployment-name-dev",
+              "Type": "String",
+              "Value": {
+                "Ref": "S3BucketDeploymentLambdas"
+              }
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": {
+              "Ref": "ServerlessDeploymentBucket"
+            },
+            "Export": {
+              "Name": "sls-infraestructure-dev-ServerlessDeploymentBucketName"
+            }
+          }
+        }
+      },
+      "coreCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "ServerlessDeploymentBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketEncryption": {
+                "ServerSideEncryptionConfiguration": [
+                  {
+                    "ServerSideEncryptionByDefault": {
+                      "SSEAlgorithm": "AES256"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "ServerlessDeploymentBucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+              "Bucket": {
+                "Ref": "ServerlessDeploymentBucket"
+              },
+              "PolicyDocument": {
+                "Statement": [
+                  {
+                    "Action": "s3:*",
+                    "Effect": "Deny",
+                    "Principal": "*",
+                    "Resource": [
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":s3:::",
+                            {
+                              "Ref": "ServerlessDeploymentBucket"
+                            },
+                            "/*"
+                          ]
+                        ]
+                      },
+                      {
+                        "Fn::Join": [
+                          "",
+                          [
+                            "arn:",
+                            {
+                              "Ref": "AWS::Partition"
+                            },
+                            ":s3:::",
+                            {
+                              "Ref": "ServerlessDeploymentBucket"
+                            }
+                          ]
+                        ]
+                      }
+                    ],
+                    "Condition": {
+                      "Bool": {
+                        "aws:SecureTransport": false
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": {
+              "Ref": "ServerlessDeploymentBucket"
+            }
+          }
+        }
+      }
+    },
+    "custom": {
+      "esbuild": {
+        "bundle": true,
+        "minify": true,
+        "sourcemap": true,
+        "exclude": [
+          "aws-sdk"
+        ],
+        "define": {},
+        "platform": "node",
+        "concurrency": 10
+      }
+    },
+    "plugins": [
+      "serverless-esbuild"
+    ],
+    "pluginsData": {},
+    "functions": {},
+    "resources": {
+      "Resources": {
+        "S3BucketDeploymentLambdas": {
+          "Type": "AWS::S3::Bucket",
+          "Properties": {
+            "BucketName": "digital-test-ttaa-jdmp-adev"
+          }
+        },
+        "SSMAPIGatewayRestApiId": {
+          "Type": "AWS::SSM::Parameter",
+          "Properties": {
+            "Name": "/digital/api-gateway-rest-api-id-dev",
+            "Type": "String",
+            "Value": "2191e9kay8"
+          }
+        },
+        "SSMAPIGatewayRestApiRootResourceId": {
+          "Type": "AWS::SSM::Parameter",
+          "Properties": {
+            "Name": "/digital/api-gateway-rest-api-root-resource-id-dev",
+            "Type": "String",
+            "Value": "6pmiw878ck"
+          }
+        },
+        "SSMS3BucketDeployment": {
+          "Type": "AWS::SSM::Parameter",
+          "Properties": {
+            "Name": "/digital/s3-bucket-deployment-name-dev",
+            "Type": "String",
+            "Value": {
+              "Ref": "S3BucketDeploymentLambdas"
+            }
+          }
+        }
+      },
+      "Outputs": {}
+    },
+    "configValidationMode": "warn",
+    "serviceFilename": "serverless.ts",
+    "initialServerlessConfig": {
+      "service": "infraestructure",
+      "frameworkVersion": "3",
+      "plugins": {
+        "$ref": "$[\"service\"][\"plugins\"]"
+      },
+      "provider": {
+        "$ref": "$[\"service\"][\"provider\"]"
+      },
+      "package": {
+        "individually": true,
+        "artifactsS3KeyDirname": "serverless/infraestructure/dev/code-artifacts"
+      },
+      "custom": {
+        "$ref": "$[\"service\"][\"custom\"]"
+      },
+      "resources": {
+        "$ref": "$[\"service\"][\"resources\"]"
+      }
+    },
+    "layers": {},
+    "isDashboardMonitoringPreconfigured": false
+  },
+  "package": {
+    "individually": true,
+    "artifactDirectoryName": "serverless/infraestructure/dev/1659046341262-2022-07-28T22:12:21.262Z",
+    "artifact": ""
+  }
+}
