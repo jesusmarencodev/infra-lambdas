@@ -102,6 +102,87 @@
           "Ref": "S3BucketDeploymentLambdas"
         }
       }
+    },
+    "EventBus": {
+      "Type": "AWS::Events::EventBus",
+      "Properties": {
+        "Name": "EventBusPracticaAWSServerless01"
+      }
+    },
+    "EventRulePE": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "EventBusName": {
+          "Fn::GetAtt": [
+            "EventBus",
+            "Name"
+          ]
+        },
+        "EventPattern": {
+          "source": [
+            "appointment"
+          ],
+          "detail-type": [
+            "appointment-create-pe"
+          ],
+          "detail": {
+            "status": [
+              "appointment-pe"
+            ]
+          }
+        },
+        "Name": "appointment-create-pe"
+      }
+    },
+    "EventRuleCO": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "EventBusName": {
+          "Fn::GetAtt": [
+            "EventBus",
+            "Name"
+          ]
+        },
+        "EventPattern": {
+          "source": [
+            "appointment"
+          ],
+          "detail-type": [
+            "appointment-create-co"
+          ],
+          "detail": {
+            "status": [
+              "appointment-co"
+            ]
+          }
+        },
+        "Name": "appointment-create-co"
+      }
+    },
+    "EventRuleEC": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "EventBusName": {
+          "Fn::GetAtt": [
+            "EventBus",
+            "Name"
+          ]
+        },
+        "EventPattern": {
+          "source": [
+            "appointment"
+          ],
+          "detail-type": [
+            "appointment-create-ec"
+          ],
+          "detail": {
+            "status": [
+              "appointment-ec"
+            ]
+          }
+        },
+        "Name": "appointment-create-ec"
+      }
     }
   },
   "Outputs": {

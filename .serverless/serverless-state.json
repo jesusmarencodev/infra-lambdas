@@ -118,6 +118,87 @@
                 "Ref": "S3BucketDeploymentLambdas"
               }
             }
+          },
+          "EventBus": {
+            "Type": "AWS::Events::EventBus",
+            "Properties": {
+              "Name": "EventBusPracticaAWSServerless01"
+            }
+          },
+          "EventRulePE": {
+            "Type": "AWS::Events::Rule",
+            "Properties": {
+              "EventBusName": {
+                "Fn::GetAtt": [
+                  "EventBus",
+                  "Name"
+                ]
+              },
+              "EventPattern": {
+                "source": [
+                  "appointment"
+                ],
+                "detail-type": [
+                  "appointment-create-pe"
+                ],
+                "detail": {
+                  "status": [
+                    "appointment-pe"
+                  ]
+                }
+              },
+              "Name": "appointment-create-pe"
+            }
+          },
+          "EventRuleCO": {
+            "Type": "AWS::Events::Rule",
+            "Properties": {
+              "EventBusName": {
+                "Fn::GetAtt": [
+                  "EventBus",
+                  "Name"
+                ]
+              },
+              "EventPattern": {
+                "source": [
+                  "appointment"
+                ],
+                "detail-type": [
+                  "appointment-create-co"
+                ],
+                "detail": {
+                  "status": [
+                    "appointment-co"
+                  ]
+                }
+              },
+              "Name": "appointment-create-co"
+            }
+          },
+          "EventRuleEC": {
+            "Type": "AWS::Events::Rule",
+            "Properties": {
+              "EventBusName": {
+                "Fn::GetAtt": [
+                  "EventBus",
+                  "Name"
+                ]
+              },
+              "EventPattern": {
+                "source": [
+                  "appointment"
+                ],
+                "detail-type": [
+                  "appointment-create-ec"
+                ],
+                "detail": {
+                  "status": [
+                    "appointment-ec"
+                  ]
+                }
+              },
+              "Name": "appointment-create-ec"
+            }
           }
         },
         "Outputs": {
@@ -265,6 +346,87 @@
               "Ref": "S3BucketDeploymentLambdas"
             }
           }
+        },
+        "EventBus": {
+          "Type": "AWS::Events::EventBus",
+          "Properties": {
+            "Name": "EventBusPracticaAWSServerless01"
+          }
+        },
+        "EventRulePE": {
+          "Type": "AWS::Events::Rule",
+          "Properties": {
+            "EventBusName": {
+              "Fn::GetAtt": [
+                "EventBus",
+                "Name"
+              ]
+            },
+            "EventPattern": {
+              "source": [
+                "appointment"
+              ],
+              "detail-type": [
+                "appointment-create-pe"
+              ],
+              "detail": {
+                "status": [
+                  "appointment-pe"
+                ]
+              }
+            },
+            "Name": "appointment-create-pe"
+          }
+        },
+        "EventRuleCO": {
+          "Type": "AWS::Events::Rule",
+          "Properties": {
+            "EventBusName": {
+              "Fn::GetAtt": [
+                "EventBus",
+                "Name"
+              ]
+            },
+            "EventPattern": {
+              "source": [
+                "appointment"
+              ],
+              "detail-type": [
+                "appointment-create-co"
+              ],
+              "detail": {
+                "status": [
+                  "appointment-co"
+                ]
+              }
+            },
+            "Name": "appointment-create-co"
+          }
+        },
+        "EventRuleEC": {
+          "Type": "AWS::Events::Rule",
+          "Properties": {
+            "EventBusName": {
+              "Fn::GetAtt": [
+                "EventBus",
+                "Name"
+              ]
+            },
+            "EventPattern": {
+              "source": [
+                "appointment"
+              ],
+              "detail-type": [
+                "appointment-create-ec"
+              ],
+              "detail": {
+                "status": [
+                  "appointment-ec"
+                ]
+              }
+            },
+            "Name": "appointment-create-ec"
+          }
         }
       },
       "Outputs": {}
@@ -296,7 +458,7 @@
   },
   "package": {
     "individually": true,
-    "artifactDirectoryName": "serverless/infraestructure/dev/1659046341262-2022-07-28T22:12:21.262Z",
+    "artifactDirectoryName": "serverless/infraestructure/dev/1659127547871-2022-07-29T20:45:47.871Z",
     "artifact": ""
   }
 }

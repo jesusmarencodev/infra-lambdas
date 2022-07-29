@@ -56,10 +56,67 @@ const serverlessConfiguration: AWS = {
           Name: "/digital/s3-bucket-deployment-name-${self:provider.stage}",
           Type: "String",
           Value: {
-            Ref:"S3BucketDeploymentLambdas" // la pripiedad ref me da una referencia de un recurso en este caso el nombre del bucket creado
+            Ref: "S3BucketDeploymentLambdas" // la pripiedad ref me da una referencia de un recurso en este caso el nombre del bucket creado
             //que sera utilizado para llnar el value del SSN que se va a crear
           },
         }
+      },
+      EventBus: {
+        Type: "AWS::Events::EventBus",
+        Properties: {
+          Name: "EventBusPracticaAWSServerless01"
+        }
+      },
+      EventRulePE: {
+        Type: "AWS::Events::Rule",
+        Properties: {
+          //se obtiene el nombre del recurso llamado eventBus, y se llena
+          //la propiedad eventBusName
+          EventBusName: { "Fn::GetAtt": ["EventBus", "Name"] },
+          EventPattern: {
+            source: ["appointment"],
+            "detail-type": ["appointment-create-pe"],
+            detail:{
+              status:["appointment-pe"]
+            }
+          },
+          Name:"appointment-create-pe",
+          //Targets: [{ Arn: { "Fn::GetAtt": ["SQSPE", "Arn"] }, Id: "SQSPE" }],
+        },
+      },
+      EventRuleCO: {
+        Type: "AWS::Events::Rule",
+        Properties: {
+          //se obtiene el nombre del recurso llamado eventBus, y se llena
+          //la propiedad eventBusName
+          EventBusName: { "Fn::GetAtt": ["EventBus", "Name"] },
+          EventPattern: {
+            source: ["appointment"],
+            "detail-type": ["appointment-create-co"],
+            detail:{
+              status:["appointment-co"]
+            }
+          },
+          Name:"appointment-create-co",
+          //Targets: [{ Arn: { "Fn::GetAtt": ["SQSPE", "Arn"] }, Id: "SQSPE" }],
+        },
+      },
+      EventRuleEC: {
+        Type: "AWS::Events::Rule",
+        Properties: {
+          //se obtiene el nombre del recurso llamado eventBus, y se llena
+          //la propiedad eventBusName
+          EventBusName: { "Fn::GetAtt": ["EventBus", "Name"] },
+          EventPattern: {
+            source: ["appointment"],
+            "detail-type": ["appointment-create-ec"],
+            detail:{
+              status:["appointment-ec"]
+            }
+          },
+          Name:"appointment-create-ec",
+          //Targets: [{ Arn: { "Fn::GetAtt": ["SQSPE", "Arn"] }, Id: "SQSPE" }],
+        },
       },
     }
   },
