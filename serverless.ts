@@ -76,11 +76,11 @@ const serverlessConfiguration: AWS = {
           EventPattern: {
             source: ["appointment"],
             "detail-type": ["appointment-create-pe"],
-            detail:{
-              status:["appointment-pe"]
+            detail: {
+              status: ["appointment-pe"]
             }
           },
-          Name:"appointment-create-pe",
+          Name: "appointment-create-pe",
           //Targets: [{ Arn: { "Fn::GetAtt": ["SQSPE", "Arn"] }, Id: "SQSPE" }],
         },
       },
@@ -93,11 +93,11 @@ const serverlessConfiguration: AWS = {
           EventPattern: {
             source: ["appointment"],
             "detail-type": ["appointment-create-co"],
-            detail:{
-              status:["appointment-co"]
+            detail: {
+              status: ["appointment-co"]
             }
           },
-          Name:"appointment-create-co",
+          Name: "appointment-create-co",
           //Targets: [{ Arn: { "Fn::GetAtt": ["SQSPE", "Arn"] }, Id: "SQSPE" }],
         },
       },
@@ -110,12 +110,31 @@ const serverlessConfiguration: AWS = {
           EventPattern: {
             source: ["appointment"],
             "detail-type": ["appointment-create-ec"],
-            detail:{
-              status:["appointment-ec"]
+            detail: {
+              status: ["appointment-ec"]
             }
           },
-          Name:"appointment-create-ec",
+          Name: "appointment-create-ec",
           //Targets: [{ Arn: { "Fn::GetAtt": ["SQSPE", "Arn"] }, Id: "SQSPE" }],
+        },
+      },
+      //SQS
+      SQSDLQ: {
+        Type: "AWS::SQS::Queue",
+        Properties: {
+          MessageRetentionPeriod: 86400,//esto es en segundos 86400 equivale a 1 dia es decir 24 horas
+          QueueName: "SQSDLQ-${self:provider.stage}", //nombre de la cola
+          //esto es en segundos 86400 equivale a 1 dia es decir 24 horas
+          VisibilityTimeout: 10 // cuantos segundos esperar hasta que aparesca en la cosa el mensaje
+        }
+      },
+      //SSM para luego utilizarlo y llamar por su valor al SQL anterior
+      SSMDLQ: {
+        Type: "AWS::SSM::Parameter",
+        Properties: {
+          Name: "/digital/sql-dlq-deployment-name-${self:provider.stage}",
+          Type: "String",
+          Value: { "Fn::GetAtt": ["SQSDLQ", "Arn"] },
         },
       },
     }

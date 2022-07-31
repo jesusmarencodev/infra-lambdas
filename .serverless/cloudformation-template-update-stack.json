@@ -183,6 +183,27 @@
         },
         "Name": "appointment-create-ec"
       }
+    },
+    "SQSDLQ": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "MessageRetentionPeriod": 86400,
+        "QueueName": "SQSDLQ-dev",
+        "VisibilityTimeout": 10
+      }
+    },
+    "SSMDLQ": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "/digital/sql-dlq-deployment-name-dev",
+        "Type": "String",
+        "Value": {
+          "Fn::GetAtt": [
+            "SQSDLQ",
+            "Arn"
+          ]
+        }
+      }
     }
   },
   "Outputs": {

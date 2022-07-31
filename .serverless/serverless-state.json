@@ -199,6 +199,27 @@
               },
               "Name": "appointment-create-ec"
             }
+          },
+          "SQSDLQ": {
+            "Type": "AWS::SQS::Queue",
+            "Properties": {
+              "MessageRetentionPeriod": 86400,
+              "QueueName": "SQSDLQ-dev",
+              "VisibilityTimeout": 10
+            }
+          },
+          "SSMDLQ": {
+            "Type": "AWS::SSM::Parameter",
+            "Properties": {
+              "Name": "/digital/sql-dlq-deployment-name-dev",
+              "Type": "String",
+              "Value": {
+                "Fn::GetAtt": [
+                  "SQSDLQ",
+                  "Arn"
+                ]
+              }
+            }
           }
         },
         "Outputs": {
@@ -427,6 +448,27 @@
             },
             "Name": "appointment-create-ec"
           }
+        },
+        "SQSDLQ": {
+          "Type": "AWS::SQS::Queue",
+          "Properties": {
+            "MessageRetentionPeriod": 86400,
+            "QueueName": "SQSDLQ-dev",
+            "VisibilityTimeout": 10
+          }
+        },
+        "SSMDLQ": {
+          "Type": "AWS::SSM::Parameter",
+          "Properties": {
+            "Name": "/digital/sql-dlq-deployment-name-dev",
+            "Type": "String",
+            "Value": {
+              "Fn::GetAtt": [
+                "SQSDLQ",
+                "Arn"
+              ]
+            }
+          }
         }
       },
       "Outputs": {}
@@ -458,7 +500,7 @@
   },
   "package": {
     "individually": true,
-    "artifactDirectoryName": "serverless/infraestructure/dev/1659127547871-2022-07-29T20:45:47.871Z",
+    "artifactDirectoryName": "serverless/infraestructure/dev/1659297570421-2022-07-31T19:59:30.421Z",
     "artifact": ""
   }
 }
