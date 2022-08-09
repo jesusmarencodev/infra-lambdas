@@ -220,6 +220,25 @@
                 ]
               }
             }
+          },
+          "AppointmentTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "Appointment-dev",
+              "BillingMode": "PAY_PER_REQUEST",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "id",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "id",
+                  "KeyType": "HASH"
+                }
+              ]
+            }
           }
         },
         "Outputs": {
@@ -469,6 +488,25 @@
               ]
             }
           }
+        },
+        "AppointmentTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "Appointment-dev",
+            "BillingMode": "PAY_PER_REQUEST",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "id",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "id",
+                "KeyType": "HASH"
+              }
+            ]
+          }
         }
       },
       "Outputs": {}
@@ -500,7 +538,7 @@
   },
   "package": {
     "individually": true,
-    "artifactDirectoryName": "serverless/infraestructure/dev/1659297570421-2022-07-31T19:59:30.421Z",
+    "artifactDirectoryName": "serverless/infraestructure/dev/1660060398801-2022-08-09T15:53:18.801Z",
     "artifact": ""
   }
 }

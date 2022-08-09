@@ -137,6 +137,26 @@ const serverlessConfiguration: AWS = {
           Value: { "Fn::GetAtt": ["SQSDLQ", "Arn"] },
         },
       },
+      AppointmentTable: {
+        Type:"AWS::DynamoDB::Table", 
+        Properties: {
+          TableName: "Appointment-${self:provider.stage}",
+          //esta propiedad es requerida y el el modo de pago, en este caso colocamos pago por request
+          BillingMode:"PAY_PER_REQUEST",
+          AttributeDefinitions:[
+            {
+              AttributeName : "id",
+              AttributeType : "S"   
+            },
+          ],
+          KeySchema : [// esto se usa para crear la llave primaria en este caso el id
+            {
+              AttributeName : "id",
+              KeyType : "HASH"
+            },
+          ],
+        }
+      }
     }
   },
 };
