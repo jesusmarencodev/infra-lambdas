@@ -61,6 +61,67 @@ const serverlessConfiguration: AWS = {
           },
         }
       },
+      //SQSDQL
+      SQSDLQ: {
+        Type: "AWS::SQS::Queue",
+        Properties: {
+          MessageRetentionPeriod: 86400,//esto es en segundos 86400 equivale a 1 dia es decir 24 horas
+          QueueName: "SQSDLQ-${self:provider.stage}", //nombre de la cola
+          //esto es en segundos 86400 equivale a 1 dia es decir 24 horas
+          VisibilityTimeout: 10 // cuantos segundos esperar hasta que aparesca en la cosa el mensaje
+        }
+      },
+      //SSM para luego utilizarlo y llamar por su valor al SQL anterior
+      SSMDLQ: {
+        Type: "AWS::SSM::Parameter",
+        Properties: {
+          Name: "/digital/sql-dlq-deployment-name-${self:provider.stage}",
+          Type: "String",
+          Value: { "Fn::GetAtt": ["SQSDLQ", "Arn"] },
+        },
+      },
+      //SQS PERU
+      SQSPE: {
+        Type: "AWS::SQS::Queue",
+        Properties: {
+          QueueName: "SQS_PE_${self:provider.stage}", //nombre de la cola
+          //RedriveAllowPolicy esta propiedad enviara a otra cola los mensajes que no
+          //se procecen, los enviaremos a la cola DLQ que tenemos
+          RedrivePolicy: {
+            deadLetterTargetArn: { "Fn::GetAtt": ["SQSDLQ", "Arn"] },
+            //con la propiedad maxReceiveCount le decimos despues de cuantos intentos lo consideraremos fallido el mensaje
+            maxReceiveCount: 2
+          }
+        }
+      },
+      //SSM cola de peru
+      SSMSQSPE: {
+        Type: "AWS::SSM::Parameter",
+        Properties: {
+          Name: "/digital/sqs-pe-arn-${self:provider.stage}",
+          Type: "String",
+          Value: { "Fn::GetAtt": ["SQSPE", "Arn"] },
+        },
+      },
+      EventBridgeToSQSPolicy: {
+        Type: "AWS::SQS::QueuePolicy",
+        Properties: {
+          PolicyDocument: {
+            Statement: [
+              {
+                Effect: "Allow",//todos los permisos
+                //events.amazon.com es el event brid de cuentra cuenta
+                Principal: { Service: "events.amazonaws.com" },// a quien le dio permiso
+                Action: "sqs:*",//le decimos que puede enviar mensajes
+                // le estamos diciendo que añada la politica al sqs de peru
+                Resource: { "Fn::GetAtt": ["SQSPE", "Arn"] },//quien da el permiso
+              },
+            ],
+          },
+          //a que recursos vamos a unir esta politica, en este caso al SQSPE
+          Queues: [{ Ref: "SQSPE" }],
+        },
+      },
       EventBus: {
         Type: "AWS::Events::EventBus",
         Properties: {
@@ -81,7 +142,7 @@ const serverlessConfiguration: AWS = {
             }
           },
           Name: "appointment-create-pe",
-          //Targets: [{ Arn: { "Fn::GetAtt": ["SQSPE", "Arn"] }, Id: "SQSPE" }],
+          Targets: [{ Arn: { "Fn::GetAtt": ["SQSPE", "Arn"] }, Id: "SQSPE" }],
         },
       },
       EventRuleCO: {
@@ -118,41 +179,22 @@ const serverlessConfiguration: AWS = {
           //Targets: [{ Arn: { "Fn::GetAtt": ["SQSPE", "Arn"] }, Id: "SQSPE" }],
         },
       },
-      //SQS
-      SQSDLQ: {
-        Type: "AWS::SQS::Queue",
-        Properties: {
-          MessageRetentionPeriod: 86400,//esto es en segundos 86400 equivale a 1 dia es decir 24 horas
-          QueueName: "SQSDLQ-${self:provider.stage}", //nombre de la cola
-          //esto es en segundos 86400 equivale a 1 dia es decir 24 horas
-          VisibilityTimeout: 10 // cuantos segundos esperar hasta que aparesca en la cosa el mensaje
-        }
-      },
-      //SSM para luego utilizarlo y llamar por su valor al SQL anterior
-      SSMDLQ: {
-        Type: "AWS::SSM::Parameter",
-        Properties: {
-          Name: "/digital/sql-dlq-deployment-name-${self:provider.stage}",
-          Type: "String",
-          Value: { "Fn::GetAtt": ["SQSDLQ", "Arn"] },
-        },
-      },
       AppointmentTable: {
-        Type:"AWS::DynamoDB::Table", 
+        Type: "AWS::DynamoDB::Table",
         Properties: {
           TableName: "Appointment-${self:provider.stage}",
           //esta propiedad es requerida y el el modo de pago, en este caso colocamos pago por request
-          BillingMode:"PAY_PER_REQUEST",
-          AttributeDefinitions:[
+          BillingMode: "PAY_PER_REQUEST",
+          AttributeDefinitions: [
             {
-              AttributeName : "id",
-              AttributeType : "S"   
+              AttributeName: "id",
+              AttributeType: "S"
             },
           ],
-          KeySchema : [// esto se usa para crear la llave primaria en este caso el id
+          KeySchema: [// esto se usa para crear la llave primaria en este caso el id
             {
-              AttributeName : "id",
-              KeyType : "HASH"
+              AttributeName: "id",
+              KeyType: "HASH"
             },
           ],
         }

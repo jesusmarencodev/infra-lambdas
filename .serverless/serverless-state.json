@@ -119,6 +119,82 @@
               }
             }
           },
+          "SQSDLQ": {
+            "Type": "AWS::SQS::Queue",
+            "Properties": {
+              "MessageRetentionPeriod": 86400,
+              "QueueName": "SQSDLQ-dev",
+              "VisibilityTimeout": 10
+            }
+          },
+          "SSMDLQ": {
+            "Type": "AWS::SSM::Parameter",
+            "Properties": {
+              "Name": "/digital/sql-dlq-deployment-name-dev",
+              "Type": "String",
+              "Value": {
+                "Fn::GetAtt": [
+                  "SQSDLQ",
+                  "Arn"
+                ]
+              }
+            }
+          },
+          "SQSPE": {
+            "Type": "AWS::SQS::Queue",
+            "Properties": {
+              "QueueName": "SQS_PE_dev",
+              "RedrivePolicy": {
+                "deadLetterTargetArn": {
+                  "Fn::GetAtt": [
+                    "SQSDLQ",
+                    "Arn"
+                  ]
+                },
+                "maxReceiveCount": 2
+              }
+            }
+          },
+          "SSMSQSPE": {
+            "Type": "AWS::SSM::Parameter",
+            "Properties": {
+              "Name": "/digital/sqs-pe-arn-dev",
+              "Type": "String",
+              "Value": {
+                "Fn::GetAtt": [
+                  "SQSPE",
+                  "Arn"
+                ]
+              }
+            }
+          },
+          "EventBridgeToSQSPolicy": {
+            "Type": "AWS::SQS::QueuePolicy",
+            "Properties": {
+              "PolicyDocument": {
+                "Statement": [
+                  {
+                    "Effect": "Allow",
+                    "Principal": {
+                      "Service": "events.amazonaws.com"
+                    },
+                    "Action": "sqs:*",
+                    "Resource": {
+                      "Fn::GetAtt": [
+                        "SQSPE",
+                        "Arn"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "Queues": [
+                {
+                  "Ref": "SQSPE"
+                }
+              ]
+            }
+          },
           "EventBus": {
             "Type": "AWS::Events::EventBus",
             "Properties": {
@@ -147,7 +223,18 @@
                   ]
                 }
               },
-              "Name": "appointment-create-pe"
+              "Name": "appointment-create-pe",
+              "Targets": [
+                {
+                  "Arn": {
+                    "Fn::GetAtt": [
+                      "SQSPE",
+                      "Arn"
+                    ]
+                  },
+                  "Id": "SQSPE"
+                }
+              ]
             }
           },
           "EventRuleCO": {
@@ -198,27 +285,6 @@
                 }
               },
               "Name": "appointment-create-ec"
-            }
-          },
-          "SQSDLQ": {
-            "Type": "AWS::SQS::Queue",
-            "Properties": {
-              "MessageRetentionPeriod": 86400,
-              "QueueName": "SQSDLQ-dev",
-              "VisibilityTimeout": 10
-            }
-          },
-          "SSMDLQ": {
-            "Type": "AWS::SSM::Parameter",
-            "Properties": {
-              "Name": "/digital/sql-dlq-deployment-name-dev",
-              "Type": "String",
-              "Value": {
-                "Fn::GetAtt": [
-                  "SQSDLQ",
-                  "Arn"
-                ]
-              }
             }
           },
           "AppointmentTable": {
@@ -387,6 +453,82 @@
             }
           }
         },
+        "SQSDLQ": {
+          "Type": "AWS::SQS::Queue",
+          "Properties": {
+            "MessageRetentionPeriod": 86400,
+            "QueueName": "SQSDLQ-dev",
+            "VisibilityTimeout": 10
+          }
+        },
+        "SSMDLQ": {
+          "Type": "AWS::SSM::Parameter",
+          "Properties": {
+            "Name": "/digital/sql-dlq-deployment-name-dev",
+            "Type": "String",
+            "Value": {
+              "Fn::GetAtt": [
+                "SQSDLQ",
+                "Arn"
+              ]
+            }
+          }
+        },
+        "SQSPE": {
+          "Type": "AWS::SQS::Queue",
+          "Properties": {
+            "QueueName": "SQS_PE_dev",
+            "RedrivePolicy": {
+              "deadLetterTargetArn": {
+                "Fn::GetAtt": [
+                  "SQSDLQ",
+                  "Arn"
+                ]
+              },
+              "maxReceiveCount": 2
+            }
+          }
+        },
+        "SSMSQSPE": {
+          "Type": "AWS::SSM::Parameter",
+          "Properties": {
+            "Name": "/digital/sqs-pe-arn-dev",
+            "Type": "String",
+            "Value": {
+              "Fn::GetAtt": [
+                "SQSPE",
+                "Arn"
+              ]
+            }
+          }
+        },
+        "EventBridgeToSQSPolicy": {
+          "Type": "AWS::SQS::QueuePolicy",
+          "Properties": {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Principal": {
+                    "Service": "events.amazonaws.com"
+                  },
+                  "Action": "sqs:*",
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "SQSPE",
+                      "Arn"
+                    ]
+                  }
+                }
+              ]
+            },
+            "Queues": [
+              {
+                "Ref": "SQSPE"
+              }
+            ]
+          }
+        },
         "EventBus": {
           "Type": "AWS::Events::EventBus",
           "Properties": {
@@ -415,7 +557,18 @@
                 ]
               }
             },
-            "Name": "appointment-create-pe"
+            "Name": "appointment-create-pe",
+            "Targets": [
+              {
+                "Arn": {
+                  "Fn::GetAtt": [
+                    "SQSPE",
+                    "Arn"
+                  ]
+                },
+                "Id": "SQSPE"
+              }
+            ]
           }
         },
         "EventRuleCO": {
@@ -468,27 +621,6 @@
             "Name": "appointment-create-ec"
           }
         },
-        "SQSDLQ": {
-          "Type": "AWS::SQS::Queue",
-          "Properties": {
-            "MessageRetentionPeriod": 86400,
-            "QueueName": "SQSDLQ-dev",
-            "VisibilityTimeout": 10
-          }
-        },
-        "SSMDLQ": {
-          "Type": "AWS::SSM::Parameter",
-          "Properties": {
-            "Name": "/digital/sql-dlq-deployment-name-dev",
-            "Type": "String",
-            "Value": {
-              "Fn::GetAtt": [
-                "SQSDLQ",
-                "Arn"
-              ]
-            }
-          }
-        },
         "AppointmentTable": {
           "Type": "AWS::DynamoDB::Table",
           "Properties": {
@@ -538,7 +670,7 @@
   },
   "package": {
     "individually": true,
-    "artifactDirectoryName": "serverless/infraestructure/dev/1660060398801-2022-08-09T15:53:18.801Z",
+    "artifactDirectoryName": "serverless/infraestructure/dev/1660253723594-2022-08-11T21:35:23.594Z",
     "artifact": ""
   }
 }
