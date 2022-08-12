@@ -135,7 +135,37 @@
               "Arn"
             ]
           },
-          "maxReceiveCount": 2
+          "maxReceiveCount": 1
+        }
+      }
+    },
+    "SQSCO": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "QueueName": "SQS_CO_dev",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "SQSDLQ",
+              "Arn"
+            ]
+          },
+          "maxReceiveCount": 1
+        }
+      }
+    },
+    "SQSEC": {
+      "Type": "AWS::SQS::Queue",
+      "Properties": {
+        "QueueName": "SQS_EC_dev",
+        "RedrivePolicy": {
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": [
+              "SQSDLQ",
+              "Arn"
+            ]
+          },
+          "maxReceiveCount": 1
         }
       }
     },
@@ -147,6 +177,32 @@
         "Value": {
           "Fn::GetAtt": [
             "SQSPE",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "SSMSQSCO": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "/digital/sqs-co-arn-dev",
+        "Type": "String",
+        "Value": {
+          "Fn::GetAtt": [
+            "SQSCO",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "SSMSQSEC": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "/digital/sqs-ec-arn-dev",
+        "Type": "String",
+        "Value": {
+          "Fn::GetAtt": [
+            "SQSEC",
             "Arn"
           ]
         }
@@ -179,6 +235,60 @@
         ]
       }
     },
+    "EventBridgeToSQSCOPolicy": {
+      "Type": "AWS::SQS::QueuePolicy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com"
+              },
+              "Action": "sqs:*",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SQSCO",
+                  "Arn"
+                ]
+              }
+            }
+          ]
+        },
+        "Queues": [
+          {
+            "Ref": "SQSCO"
+          }
+        ]
+      }
+    },
+    "EventBridgeToSQSECPolicy": {
+      "Type": "AWS::SQS::QueuePolicy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "events.amazonaws.com"
+              },
+              "Action": "sqs:*",
+              "Resource": {
+                "Fn::GetAtt": [
+                  "SQSEC",
+                  "Arn"
+                ]
+              }
+            }
+          ]
+        },
+        "Queues": [
+          {
+            "Ref": "SQSEC"
+          }
+        ]
+      }
+    },
     "EventBus": {
       "Type": "AWS::Events::EventBus",
       "Properties": {
@@ -200,14 +310,8 @@
           ],
           "detail-type": [
             "appointment-create-pe"
-          ],
-          "detail": {
-            "status": [
-              "appointment-pe"
-            ]
-          }
+          ]
         },
-        "Name": "appointment-create-pe",
         "Targets": [
           {
             "Arn": {
@@ -236,14 +340,19 @@
           ],
           "detail-type": [
             "appointment-create-co"
-          ],
-          "detail": {
-            "status": [
-              "appointment-co"
-            ]
-          }
+          ]
         },
-        "Name": "appointment-create-co"
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "SQSCO",
+                "Arn"
+              ]
+            },
+            "Id": "SQSCO"
+          }
+        ]
       }
     },
     "EventRuleEC": {
@@ -261,14 +370,19 @@
           ],
           "detail-type": [
             "appointment-create-ec"
-          ],
-          "detail": {
-            "status": [
-              "appointment-ec"
-            ]
-          }
+          ]
         },
-        "Name": "appointment-create-ec"
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "SQSEC",
+                "Arn"
+              ]
+            },
+            "Id": "SQSEC"
+          }
+        ]
       }
     },
     "AppointmentTable": {

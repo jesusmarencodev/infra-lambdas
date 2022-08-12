@@ -90,7 +90,33 @@ const serverlessConfiguration: AWS = {
           RedrivePolicy: {
             deadLetterTargetArn: { "Fn::GetAtt": ["SQSDLQ", "Arn"] },
             //con la propiedad maxReceiveCount le decimos despues de cuantos intentos lo consideraremos fallido el mensaje
-            maxReceiveCount: 2
+            maxReceiveCount: 1
+          }
+        }
+      },
+      SQSCO: {
+        Type: "AWS::SQS::Queue",
+        Properties: {
+          QueueName: "SQS_CO_${self:provider.stage}", //nombre de la cola
+          //RedriveAllowPolicy esta propiedad enviara a otra cola los mensajes que no
+          //se procecen, los enviaremos a la cola DLQ que tenemos
+          RedrivePolicy: {
+            deadLetterTargetArn: { "Fn::GetAtt": ["SQSDLQ", "Arn"] },
+            //con la propiedad maxReceiveCount le decimos despues de cuantos intentos lo consideraremos fallido el mensaje
+            maxReceiveCount: 1
+          }
+        }
+      },
+      SQSEC: {
+        Type: "AWS::SQS::Queue",
+        Properties: {
+          QueueName: "SQS_EC_${self:provider.stage}", //nombre de la cola
+          //RedriveAllowPolicy esta propiedad enviara a otra cola los mensajes que no
+          //se procecen, los enviaremos a la cola DLQ que tenemos
+          RedrivePolicy: {
+            deadLetterTargetArn: { "Fn::GetAtt": ["SQSDLQ", "Arn"] },
+            //con la propiedad maxReceiveCount le decimos despues de cuantos intentos lo consideraremos fallido el mensaje
+            maxReceiveCount: 1
           }
         }
       },
@@ -103,23 +129,80 @@ const serverlessConfiguration: AWS = {
           Value: { "Fn::GetAtt": ["SQSPE", "Arn"] },
         },
       },
+      SSMSQSCO: {
+        Type: "AWS::SSM::Parameter",
+        Properties: {
+          Name: "/digital/sqs-co-arn-${self:provider.stage}",
+          Type: "String",
+          Value: { "Fn::GetAtt": ["SQSCO", "Arn"] },
+        },
+      },
+      SSMSQSEC: {
+        Type: "AWS::SSM::Parameter",
+        Properties: {
+          Name: "/digital/sqs-ec-arn-${self:provider.stage}",
+          Type: "String",
+          Value: { "Fn::GetAtt": ["SQSEC", "Arn"] },
+        },
+      },
+      //politica de peru sqs
       EventBridgeToSQSPolicy: {
         Type: "AWS::SQS::QueuePolicy",
         Properties: {
           PolicyDocument: {
             Statement: [
               {
-                Effect: "Allow",//todos los permisos
+                Effect: "Allow",
                 //events.amazon.com es el event brid de cuentra cuenta
                 Principal: { Service: "events.amazonaws.com" },// a quien le dio permiso
                 Action: "sqs:*",//le decimos que puede enviar mensajes
                 // le estamos diciendo que añada la politica al sqs de peru
-                Resource: { "Fn::GetAtt": ["SQSPE", "Arn"] },//quien da el permiso
+                Resource: { "Fn::GetAtt": ["SQSPE", "Arn"] },
               },
             ],
           },
           //a que recursos vamos a unir esta politica, en este caso al SQSPE
           Queues: [{ Ref: "SQSPE" }],
+        },
+      },
+      //politica de colombia sqs
+      EventBridgeToSQSCOPolicy: {
+        Type: "AWS::SQS::QueuePolicy",
+        Properties: {
+          PolicyDocument: {
+            Statement: [
+              {
+                Effect: "Allow",
+                //events.amazon.com es el event brid de cuentra cuenta
+                Principal: { Service: "events.amazonaws.com" },// a quien le dio permiso
+                Action: "sqs:*",//le decimos que puede enviar mensajes
+                // le estamos diciendo que añada la politica al sqs de peru
+                Resource: { "Fn::GetAtt": ["SQSCO", "Arn"] },
+              },
+            ],
+          },
+          //a que recursos vamos a unir esta politica, en este caso al SQSPE
+          Queues: [{ Ref: "SQSCO" }],
+        },
+      },
+      //politica de ecuador para sqs
+      EventBridgeToSQSECPolicy: {
+        Type: "AWS::SQS::QueuePolicy",
+        Properties: {
+          PolicyDocument: {
+            Statement: [
+              {
+                Effect: "Allow",
+                //events.amazon.com es el event brid de cuentra cuenta
+                Principal: { Service: "events.amazonaws.com" },// a quien le dio permiso
+                Action: "sqs:*",//le decimos que puede enviar mensajes
+                // le estamos diciendo que añada la politica al sqs de peru
+                Resource: { "Fn::GetAtt": ["SQSEC", "Arn"] },
+              },
+            ],
+          },
+          //a que recursos vamos a unir esta politica, en este caso al SQSPE
+          Queues: [{ Ref: "SQSEC" }],
         },
       },
       EventBus: {
@@ -130,18 +213,14 @@ const serverlessConfiguration: AWS = {
       },
       EventRulePE: {
         Type: "AWS::Events::Rule",
+        //se obtiene el nombre del recurso llamado eventBus, y se llena
+        //la propiedad eventBusName
         Properties: {
-          //se obtiene el nombre del recurso llamado eventBus, y se llena
-          //la propiedad eventBusName
           EventBusName: { "Fn::GetAtt": ["EventBus", "Name"] },
           EventPattern: {
             source: ["appointment"],
             "detail-type": ["appointment-create-pe"],
-            detail: {
-              status: ["appointment-pe"]
-            }
           },
-          Name: "appointment-create-pe",
           Targets: [{ Arn: { "Fn::GetAtt": ["SQSPE", "Arn"] }, Id: "SQSPE" }],
         },
       },
@@ -154,12 +233,8 @@ const serverlessConfiguration: AWS = {
           EventPattern: {
             source: ["appointment"],
             "detail-type": ["appointment-create-co"],
-            detail: {
-              status: ["appointment-co"]
-            }
           },
-          Name: "appointment-create-co",
-          //Targets: [{ Arn: { "Fn::GetAtt": ["SQSPE", "Arn"] }, Id: "SQSPE" }],
+          Targets: [{ Arn: { "Fn::GetAtt": ["SQSCO", "Arn"] }, Id: "SQSCO" }],
         },
       },
       EventRuleEC: {
@@ -171,12 +246,8 @@ const serverlessConfiguration: AWS = {
           EventPattern: {
             source: ["appointment"],
             "detail-type": ["appointment-create-ec"],
-            detail: {
-              status: ["appointment-ec"]
-            }
           },
-          Name: "appointment-create-ec",
-          //Targets: [{ Arn: { "Fn::GetAtt": ["SQSPE", "Arn"] }, Id: "SQSPE" }],
+          Targets: [{ Arn: { "Fn::GetAtt": ["SQSEC", "Arn"] }, Id: "SQSEC" }],
         },
       },
       AppointmentTable: {
