@@ -93,6 +93,12 @@
               "BucketName": "digital-test-ttaa-jdmp-adev"
             }
           },
+          "S3BucketMedic": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+              "BucketName": "digital-test-ttaa-medic-dev"
+            }
+          },
           "SSMAPIGatewayRestApiId": {
             "Type": "AWS::SSM::Parameter",
             "Properties": {
@@ -116,6 +122,16 @@
               "Type": "String",
               "Value": {
                 "Ref": "S3BucketDeploymentLambdas"
+              }
+            }
+          },
+          "SSMS3BucketMedic": {
+            "Type": "AWS::SSM::Parameter",
+            "Properties": {
+              "Name": "/digital/s3-bucket-medic-name-dev",
+              "Type": "String",
+              "Value": {
+                "Ref": "S3BucketMedic"
               }
             }
           },
@@ -541,6 +557,12 @@
             "BucketName": "digital-test-ttaa-jdmp-adev"
           }
         },
+        "S3BucketMedic": {
+          "Type": "AWS::S3::Bucket",
+          "Properties": {
+            "BucketName": "digital-test-ttaa-medic-dev"
+          }
+        },
         "SSMAPIGatewayRestApiId": {
           "Type": "AWS::SSM::Parameter",
           "Properties": {
@@ -564,6 +586,16 @@
             "Type": "String",
             "Value": {
               "Ref": "S3BucketDeploymentLambdas"
+            }
+          }
+        },
+        "SSMS3BucketMedic": {
+          "Type": "AWS::SSM::Parameter",
+          "Properties": {
+            "Name": "/digital/s3-bucket-medic-name-dev",
+            "Type": "String",
+            "Value": {
+              "Ref": "S3BucketMedic"
             }
           }
         },
@@ -898,7 +930,7 @@
   },
   "package": {
     "individually": true,
-    "artifactDirectoryName": "serverless/infraestructure/dev/1660323775756-2022-08-12T17:02:55.756Z",
+    "artifactDirectoryName": "serverless/infraestructure/dev/1660334485483-2022-08-12T20:01:25.483Z",
     "artifact": ""
   }
 }

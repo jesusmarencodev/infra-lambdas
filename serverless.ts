@@ -34,6 +34,12 @@ const serverlessConfiguration: AWS = {
           BucketName: "digital-test-ttaa-jdmp-a${self:provider.stage}", //nombre del backup el qe yo quiera
         }
       },
+      S3BucketMedic: {
+        Type: "AWS::S3::Bucket",
+        Properties: {
+          BucketName: "digital-test-ttaa-medic-${self:provider.stage}", //nombre del backup el qe yo quiera
+        }
+      },
       SSMAPIGatewayRestApiId: {
         Type: "AWS::SSM::Parameter",
         Properties: {
@@ -57,6 +63,17 @@ const serverlessConfiguration: AWS = {
           Type: "String",
           Value: {
             Ref: "S3BucketDeploymentLambdas" // la pripiedad ref me da una referencia de un recurso en este caso el nombre del bucket creado
+            //que sera utilizado para llnar el value del SSN que se va a crear
+          },
+        }
+      },
+      SSMS3BucketMedic: {
+        Type: "AWS::SSM::Parameter",
+        Properties: {
+          Name: "/digital/s3-bucket-medic-name-${self:provider.stage}",
+          Type: "String",
+          Value: {
+            Ref: "S3BucketMedic" // la pripiedad ref me da una referencia de un recurso en este caso el nombre del bucket creado
             //que sera utilizado para llnar el value del SSN que se va a crear
           },
         }
