@@ -435,6 +435,25 @@
                 }
               ]
             }
+          },
+          "MedicTable": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+              "TableName": "Medic-dev",
+              "BillingMode": "PAY_PER_REQUEST",
+              "AttributeDefinitions": [
+                {
+                  "AttributeName": "id",
+                  "AttributeType": "S"
+                }
+              ],
+              "KeySchema": [
+                {
+                  "AttributeName": "id",
+                  "KeyType": "HASH"
+                }
+              ]
+            }
           }
         },
         "Outputs": {
@@ -899,6 +918,25 @@
               }
             ]
           }
+        },
+        "MedicTable": {
+          "Type": "AWS::DynamoDB::Table",
+          "Properties": {
+            "TableName": "Medic-dev",
+            "BillingMode": "PAY_PER_REQUEST",
+            "AttributeDefinitions": [
+              {
+                "AttributeName": "id",
+                "AttributeType": "S"
+              }
+            ],
+            "KeySchema": [
+              {
+                "AttributeName": "id",
+                "KeyType": "HASH"
+              }
+            ]
+          }
         }
       },
       "Outputs": {}
@@ -930,7 +968,7 @@
   },
   "package": {
     "individually": true,
-    "artifactDirectoryName": "serverless/infraestructure/dev/1660334485483-2022-08-12T20:01:25.483Z",
+    "artifactDirectoryName": "serverless/infraestructure/dev/1660662417052-2022-08-16T15:06:57.052Z",
     "artifact": ""
   }
 }
